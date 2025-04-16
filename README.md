@@ -24,29 +24,35 @@ You can skip steps 1, 2, and 5 if you have already completed the Local Testing s
 4. Set the Kubernetes context to use Rancher Desktop:
    ```bash
    kubectl config use-context rancher-desktop
+   ```
 5. Build Docker images for the publisher and worker:
    ```bash
    docker build -t publisher ./publisher
    docker build -t worker ./worker
+   ```
 6. Tag and push the publisher Docker image to your Docker Hub account:
-     ```bash
-     docker tag publisher:latest <your-docker-username>/publisher:latest
-     docker push <your-docker-username>/publisher:latest
-     ```
+   ```bash
+   docker tag publisher:latest <your-docker-username>/publisher:latest
+   docker push <your-docker-username>/publisher:latest
+   ```
 7. Tag and push the worker Docker image to your Docker Hub account:
    ```bash
-     docker tag worker:latest <your-docker-username>/worker:latest
-     docker push <your-docker-username>/worker:latest
-     ```
+   docker tag worker:latest <your-docker-username>/worker:latest
+   docker push <your-docker-username>/worker:latest
+   ```
 8. Update the `image` field in the deployment YAML files for both the publisher and worker:
    ```yaml
    image: <your-docker-username>/<service-name>:latest
+   ```
 9. Apply the Kubernetes deployment files from the `k8s` directory:
    ```bash
    kubectl apply -f ./k8s
+   ```
 10. Check that all pods have started successfully:
-   ```bash
-   kubectl get pods
+    ```bash
+    kubectl get pods
+    ```
 11. Copy the name of the publisher pod (e.g., `publisher-xxxxxxxxxx-xxxxx`) and run the following command to forward the port. This allows you to access the web server at http://localhost:8000/ :
-   ```bash
-   kubectl port-forward publisher-xxxxxxxxxx-xxxxx 8000:8000
+    ```bash
+    kubectl port-forward publisher-xxxxxxxxxx-xxxxx 8000:8000
+    ```
