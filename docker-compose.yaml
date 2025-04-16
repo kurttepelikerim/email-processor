@@ -1,0 +1,63 @@
+version: '3'
+
+x-common-env: &common-env
+  environment:
+    - REDIS_HOST=redis
+    - RABBITMQ_HOST=rabbitmq
+    - WORKDIR=test
+
+services:
+  redis:
+    image: redis:alpine
+    ports:
+      - "6379:6379"
+    networks:
+      - my-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "PING"]
+      interval: 1s
+      timeout: 3s
+      retries: 3
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    networks:
+      - my-network
+    healthcheck:
+      test: ["CMD-SHELL", "rabbitmqctl status || exit 1"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  publisher:
+    build: ./publisher
+    image: publisher
+    ports:
+      - "8000:8000"
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - my-network
+    <<: *common-env
+      
+  worker:
+    build: ./worker
+    image: worker
+    depends_on:
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - my-network
+    <<: *common-env
+
+networks:
+  my-network:
+    driver: bridge
